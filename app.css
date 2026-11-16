@@ -325,7 +325,7 @@ section.dark .eyebrow { background: linear-gradient(90deg, var(--amber), #FFD95A
 section.dark .card { border-color: rgba(255,255,255,0.06); }
 .game .body h3 { color: var(--ink); }
 .library h1 span { background: linear-gradient(180deg, transparent 62%, var(--amber) 62%); padding: 0 4px; }
-.brand img { border-radius: 8px; background: var(--forest); }
+.brand img { border-radius: 0; background: none; width: 36px; height: 36px; object-fit: contain; }
 section .tag, section.dark .tag { color: var(--ink); }
 body.presenting .rules-doc > section:not(.cover) { justify-content: safe center; }
 body.presenting .rules-doc > section > * { width: 100%; max-width: 1400px; margin-left: auto; margin-right: auto; }
@@ -344,3 +344,128 @@ body.presenting .toast { bottom: calc(84px + var(--safe-b)); }
 .present-ui button:disabled { opacity: .3; cursor: default; transform: none; background: transparent; }
 .present-ui .count.bump { animation: bump .25s ease-out; }
 @keyframes bump { 50% { transform: scale(1.18); color: var(--amber); } }
+
+/* =========================================================
+   Present mode v2 — top HUD, bottom controls, phone layouts
+   ========================================================= */
+.present-top, .more-hint { display: none; }
+body.presenting .present-top {
+  display: block; position: fixed; top: 0; left: 0; right: 0; z-index: 26;
+  padding: calc(8px + var(--safe-t)) clamp(12px, 3vw, 28px) 6px;
+  background: linear-gradient(var(--cream) 55%, transparent);
+  color: var(--ink);
+  pointer-events: none;
+}
+body.presenting:has(.rules-doc > section.alt.current) .present-top { background: linear-gradient(var(--cream-2) 55%, transparent); }
+body.presenting:has(.rules-doc > section.dark.current) .present-top { background: linear-gradient(var(--forest) 55%, transparent); color: var(--cream); }
+body.presenting:has(.rules-doc > section.cover.current) .present-top { background: linear-gradient(rgba(10, 20, 26, 0.55), transparent); color: #fff; }
+.segs { display: flex; gap: 4px; pointer-events: auto; }
+.segs i { flex: 1; height: 4px; border-radius: 2px; background: currentColor; opacity: .18; cursor: pointer; transition: opacity .2s, background .2s; position: relative; }
+.segs i::after { content: ''; position: absolute; inset: -8px 0; } /* bigger tap target */
+.segs i.done { opacity: .55; }
+.segs i.now { opacity: 1; background: var(--amber); }
+.ptop-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; min-height: 40px; }
+.ptitle { flex: 1; min-width: 0; font-size: 13px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .8; }
+.ptop-row button {
+  pointer-events: auto; flex: none; border: 0; width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center; color: inherit;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  -webkit-tap-highlight-color: transparent; transition: transform .1s, background .15s;
+}
+.ptop-row button:active { transform: scale(0.88); background: rgba(247, 194, 27, 0.4); }
+.ptop-row svg { width: 20px; height: 20px; }
+
+/* slides leave room for HUD + controls; page number lives in the HUD now */
+body.presenting .rules-doc > section:not(.cover) {
+  padding-top: calc(76px + var(--safe-t));
+  padding-bottom: calc(96px + var(--safe-b));
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+body.presenting .pagenum { display: none; }
+body.presenting .rules-doc > section { touch-action: pan-y; }
+
+/* desktop pill: icons only */
+.present-ui .lbl { display: none; }
+
+/* scroll-for-more hint */
+body.presenting .more-hint {
+  display: block; position: fixed; left: 50%; bottom: calc(76px + var(--safe-b)); z-index: 24;
+  transform: translate(-50%, 8px); opacity: 0; pointer-events: none;
+  padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 700;
+  background: var(--ink); color: var(--cream); box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  transition: opacity .25s, transform .25s; cursor: pointer;
+}
+body.presenting .more-hint.on { opacity: .92; transform: translate(-50%, 0); pointer-events: auto; animation: nudge 1.6s ease-in-out 1s 2; }
+@keyframes nudge { 50% { transform: translate(-50%, 4px); } }
+
+/* ---------- phone, portrait ---------- */
+@media (max-width: 700px) {
+  body.presenting .present-ui {
+    left: 0; right: 0; bottom: 0; transform: none;
+    border-radius: 20px 20px 0 0; justify-content: space-between; gap: 8px;
+    padding: 10px 12px calc(10px + var(--safe-b));
+    background: rgba(20, 48, 59, 0.96);
+  }
+  .present-ui button { width: auto; height: 48px; border-radius: 14px; padding: 0 16px; gap: 4px; display: flex; align-items: center; font-size: 15px; font-weight: 700; }
+  .present-ui .lbl { display: inline; }
+  .present-ui #pNext { background: var(--amber); color: var(--ink); box-shadow: 0 3px 0 var(--orange); }
+  .present-ui #pNext:active { transform: translateY(2px) scale(0.97); box-shadow: 0 1px 0 var(--orange); }
+  .present-ui #pNext:disabled { background: rgba(255,255,255,0.1); color: var(--cream); box-shadow: none; }
+  .present-ui .count { flex: 1; }
+  body.presenting .more-hint { bottom: calc(80px + var(--safe-b)); }
+  body.presenting .rules-doc > section:not(.cover) { padding-left: 18px; padding-right: 18px; padding-bottom: calc(100px + var(--safe-b)); }
+  body.presenting .rules-doc > section.cover .art { max-height: 52vh; min-height: 0; }
+  body.presenting .rules-doc > section.cover .txt { padding: 24px 22px calc(96px + var(--safe-b)); }
+}
+
+/* ---------- compact type for small screens (portrait phones + landscape phones) ---------- */
+@media (max-width: 700px), (max-height: 520px) {
+  body.presenting .rules-doc > section:not(.cover) { gap: 16px; }
+  body.presenting .rules-doc > section h2 { font-size: clamp(24px, 7vw, 32px); }
+  body.presenting .rules-doc > section h3 { font-size: 19px; }
+  body.presenting .rules-doc > section p { font-size: 15.5px; line-height: 1.6; }
+  body.presenting .rules-doc > section .lead { font-size: 16.5px; }
+  body.presenting .rules-doc > section .eyebrow { font-size: 12px; letter-spacing: 3px; }
+  body.presenting .card { padding: 16px; border-radius: 18px; gap: 8px; }
+  body.presenting .grid { gap: 12px; }
+  body.presenting .rules { gap: 10px; }
+  body.presenting .rule .mark { width: 28px; height: 28px; font-size: 14px; }
+  body.presenting .pic { max-height: 30vh; }
+  body.presenting .pic.h-lg, body.presenting .pic.h-md { height: auto; max-height: 34vh; }
+  body.presenting .banner { height: 120px; }
+  body.presenting h1.title { font-size: clamp(40px, 12vw, 56px); }
+}
+
+/* ---------- phone, landscape: two columns so a chapter fits one screen ---------- */
+@media (max-height: 520px) and (orientation: landscape) {
+  body.presenting .present-top { padding-top: calc(4px + var(--safe-t)); }
+  body.presenting .ptop-row { min-height: 32px; margin-top: 2px; }
+  body.presenting .ptop-row button { width: 32px; height: 32px; }
+  body.presenting .rules-doc > section:not(.cover) {
+    padding: calc(52px + var(--safe-t)) max(28px, env(safe-area-inset-right)) calc(68px + var(--safe-b)) max(28px, env(safe-area-inset-left));
+  }
+  body.presenting .split, body.presenting .split.rev, body.presenting .split.narrow-pic { grid-template-columns: 1fr 1fr; gap: 24px; }
+  body.presenting .grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  body.presenting .grid.two { grid-template-columns: 1fr 1fr; }
+  body.presenting .pic, body.presenting .pic.h-lg, body.presenting .pic.h-md { max-height: 52vh; }
+  body.presenting .card .pic, body.presenting .pic.h-sm { max-height: 24vh; height: auto; }
+  body.presenting .present-ui { bottom: calc(8px + var(--safe-b)); padding: 4px; }
+  body.presenting .present-ui button { width: 36px; height: 36px; }
+  body.presenting .more-hint { bottom: calc(56px + var(--safe-b)); }
+  body.presenting .rules-doc > section.cover { grid-template-columns: 1fr 1fr; }
+  body.presenting .rules-doc > section.cover .art { max-height: 100vh; height: 100vh; }
+  body.presenting .rules-doc > section.cover .txt { padding: 24px 32px 64px; gap: 10px; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  body.presenting .rules-doc > section:not(.cover) { gap: 10px; justify-content: flex-start; }
+  body.presenting .rules-doc > section h2 { font-size: 24px; }
+  body.presenting .rules-doc > section .head { gap: 2px; }
+  body.presenting .rules-doc > section p { font-size: 14px; line-height: 1.5; }
+  body.presenting .rules { gap: 6px; }
+  body.presenting .rule .mark { width: 24px; height: 24px; font-size: 12px; }
+  body.presenting .card { padding: 12px 14px; }
+  body.presenting .present-ui { left: auto; right: max(12px, env(safe-area-inset-right)); transform: none; }
+  body.presenting .more-hint { left: auto; right: max(12px, env(safe-area-inset-right)); transform: translateY(8px); bottom: calc(60px + var(--safe-b)); }
+  body.presenting .more-hint.on { transform: none; animation: none; }
+}

@@ -1,5 +1,5 @@
 // Bump VERSION whenever shell files or rules change.
-const VERSION = 'v3';
+const VERSION = 'v5';
 const SHELL = `shell-${VERSION}`;
 const GAMES = `games-${VERSION}`;
 const FONTS = 'fonts-v1';
@@ -14,6 +14,10 @@ const SHELL_FILES = [
   'icons/icon-512.png',
   'icons/apple-touch-icon.png',
   'icons/logo.png',
+  'icons/icon-32.png',
+  'icons/icon-48.png',
+  'icons/maskable-192.png',
+  'icons/maskable-512.png',
   'games/index.json',
 ];
 
@@ -30,10 +34,12 @@ const GAME_FILES = {
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
-    await (await caches.open(SHELL)).addAll(SHELL_FILES);
+    // cache: 'reload' skips the browser's HTTP cache so a new VERSION never stores stale files
+    const fresh = urls => urls.map(u => new Request(u, { cache: 'reload' }));
+    await (await caches.open(SHELL)).addAll(fresh(SHELL_FILES));
     const games = await caches.open(GAMES);
     for (const [id, files] of Object.entries(GAME_FILES)) {
-      await games.addAll(files.map(f => `games/${id}/${f}`));
+      await games.addAll(fresh(files.map(f => `games/${id}/${f}`)));
     }
   })());
 });

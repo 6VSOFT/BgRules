@@ -236,37 +236,77 @@
   $('#backBtn').onclick = () => { location.hash = '#/'; };
 
   /* ---------------- present mode ---------------- */
+  const isPresenting = () => document.body.classList.contains('presenting');
+  const moreHint = $('#pMore');
+  let wakeLock = null;
+
+  async function keepAwake(on) {
+    try {
+      if (on && 'wakeLock' in navigator && !wakeLock) {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+      } else if (!on && wakeLock) {
+        await wakeLock.release(); wakeLock = null;
+      }
+    } catch { /* not supported or denied */ }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && isPresenting()) keepAwake(true);
+  });
+
   function enterPresent(i) {
     if (!current) return;
+    $('#pSegs').innerHTML = current.sections.map(() => '<i></i>').join('');
     document.body.classList.add('presenting');
     showSlide(i || 0, 0);
-    document.documentElement.requestFullscreen?.().catch(() => {});
+    // Fullscreen only on large screens; on phones it fights the browser's own UI.
+    if (matchMedia('(min-width: 900px) and (pointer: fine)').matches) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    }
+    keepAwake(true);
   }
   function exitPresent(updateHash = true) {
-    if (!document.body.classList.contains('presenting')) return;
+    if (!isPresenting()) return;
     document.body.classList.remove('presenting');
-    current?.sections.forEach(s => s.classList.remove('current'));
+    current?.sections.forEach(s => { s.classList.remove('current'); s.style.transform = ''; s.style.opacity = ''; });
+    moreHint.classList.remove('on');
     if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    keepAwake(false);
     if (current) {
       current.sections[presentIdx]?.scrollIntoView();
       if (updateHash) history.replaceState(null, '', `#/g/${current.game.id}`);
     }
   }
+  function updateMore() {
+    const s = current?.sections[presentIdx];
+    if (!s || !isPresenting()) return moreHint.classList.remove('on');
+    moreHint.classList.toggle('on', s.scrollHeight - s.clientHeight - s.scrollTop > 40);
+  }
   function showSlide(i, dir) {
     const n = current.sections.length;
     i = Math.max(0, Math.min(n - 1, i));
     if (dir === undefined) dir = i >= presentIdx ? 1 : -1;
-    current.sections.forEach((s, k) => s.classList.toggle('current', k === i));
+    current.sections.forEach((s, k) => {
+      s.classList.toggle('current', k === i);
+      s.style.transform = ''; s.style.opacity = '';
+    });
     const s = current.sections[i];
-    s.style.setProperty('--dir', dir * 24 + 'px');
+    s.style.setProperty('--dir', dir * 40 + 'px');
     s.scrollTop = 0;
+    s.onscroll = updateMore;
     presentIdx = i;
     const cnt = $('#pCount');
     cnt.textContent = `${i + 1} / ${n}`;
     cnt.classList.remove('bump'); void cnt.offsetWidth; cnt.classList.add('bump');
+    $('#pTitle').textContent = `${num(s, i)} · ${title(s)}`;
+    $$('#pSegs i').forEach((seg, k) => { seg.classList.toggle('done', k < i); seg.classList.toggle('now', k === i); });
     $('#pPrev').disabled = i === 0;
     $('#pNext').disabled = i === n - 1;
     setActive(i);
+    // images may still be loading; re-check overflow once they settle
+    updateMore();
+    setTimeout(updateMore, 400);
+    $$('img', s).forEach(img => { if (!img.complete) img.addEventListener('load', updateMore, { once: true }); });
   }
   $('#presentBtn').onclick = () => {
     history.replaceState(null, '', `#/g/${current.game.id}/present`);
@@ -275,13 +315,22 @@
   $('#pPrev').onclick = () => showSlide(presentIdx - 1);
   $('#pNext').onclick = () => showSlide(presentIdx + 1);
   $('#pExit').onclick = () => exitPresent();
-  document.addEventListener('fullscreenchange', () => {
-    if (!document.fullscreenElement && document.body.classList.contains('presenting')) exitPresent();
+  $('#pSegs').addEventListener('click', e => {
+    const k = [...e.currentTarget.children].indexOf(e.target);
+    if (k >= 0) showSlide(k);
   });
+  moreHint.onclick = () => {
+    const s = current.sections[presentIdx];
+    s.scrollBy({ top: s.clientHeight * 0.7, behavior: 'smooth' });
+  };
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && isPresenting()) exitPresent();
+  });
+  addEventListener('resize', updateMore);
 
   addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeLightbox(); closeToc(); }
-    if (!document.body.classList.contains('presenting')) return;
+    if (!isPresenting()) return;
     if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); showSlide(presentIdx + 1); }
     if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); showSlide(presentIdx - 1); }
     if (e.key === 'Home') showSlide(0);
@@ -289,14 +338,42 @@
     if (e.key === 'Escape') exitPresent();
   });
 
-  // swipe
-  let tx = 0, ty = 0, tt = 0;
-  addEventListener('touchstart', e => { const t = e.touches[0]; tx = t.clientX; ty = t.clientY; tt = Date.now(); }, { passive: true });
-  addEventListener('touchend', e => {
-    if (!document.body.classList.contains('presenting')) return;
-    const t = e.changedTouches[0];
+  // swipe: the slide follows the finger horizontally; vertical drags scroll as usual
+  let tx = 0, ty = 0, tt = 0, axis = null;
+  addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0]; tx = t.clientX; ty = t.clientY; tt = Date.now(); axis = null;
+  }, { passive: true });
+  addEventListener('touchmove', e => {
+    if (!isPresenting() || e.touches.length !== 1) return;
+    const t = e.touches[0];
     const dx = t.clientX - tx, dy = t.clientY - ty;
-    if (Date.now() - tt < 600 && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) showSlide(presentIdx + (dx < 0 ? 1 : -1));
+    if (!axis && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    if (axis !== 'x') return;
+    const s = current.sections[presentIdx];
+    const atEdge = (dx > 0 && presentIdx === 0) || (dx < 0 && presentIdx === current.sections.length - 1);
+    const d = atEdge ? dx * 0.2 : dx * 0.6;
+    s.style.animation = 'none';
+    s.style.transform = `translateX(${d}px)`;
+    s.style.opacity = String(1 - Math.min(Math.abs(d) / innerWidth, 0.5));
+  }, { passive: true });
+  addEventListener('touchend', e => {
+    if (!isPresenting() || axis !== 'x') return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - tx;
+    const s = current.sections[presentIdx];
+    const fast = Date.now() - tt < 300 && Math.abs(dx) > 30;
+    const step = dx < 0 ? 1 : -1;
+    const target = presentIdx + step;
+    s.style.animation = '';
+    if ((Math.abs(dx) > innerWidth * 0.22 || fast) && target >= 0 && target < current.sections.length) {
+      showSlide(target, step);
+    } else {
+      s.style.transition = 'transform .25s ease, opacity .25s ease';
+      s.style.transform = ''; s.style.opacity = '';
+      setTimeout(() => { s.style.transition = ''; }, 260);
+    }
+    axis = null;
   }, { passive: true });
 
   /* ---------------- lightbox ---------------- */
