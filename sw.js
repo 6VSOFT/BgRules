@@ -1,5 +1,5 @@
-// Bump VERSION whenever shell files or rules change.
-const VERSION = 'v7';
+// Bump VERSION whenever shell files or rules change; it also busts the CDN cache on install.
+const VERSION = 'v8';
 const SHELL = `shell-${VERSION}`;
 const GAMES = `games-${VERSION}`;
 const FONTS = 'fonts-v1';
@@ -38,15 +38,27 @@ const GAME_FILES = {
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
-    // cache: 'reload' skips the browser's HTTP cache so a new VERSION never stores stale files
-    const fresh = urls => urls.map(u => new Request(u, { cache: 'reload' }));
-    await (await caches.open(SHELL)).addAll(fresh(SHELL_FILES));
-    const games = await caches.open(GAMES);
+    await precache(SHELL, SHELL_FILES);
     for (const [id, files] of Object.entries(GAME_FILES)) {
-      await games.addAll(fresh(files.map(f => `games/${id}/${f}`)));
+      await precache(GAMES, files.map(f => `games/${id}/${f}`));
     }
   })());
 });
+
+// Fetch each file as `url?v=VERSION`: a URL the CDN (GitHub Pages caches ~10 min) and the
+// browser have never seen, so a new VERSION can't pick up a stale copy. Store it under the
+// clean URL so normal page requests match. Any failure aborts the install (old version stays).
+async function precache(cacheName, urls) {
+  const cache = await caches.open(cacheName);
+  await Promise.all(urls.map(async u => {
+    const clean = new URL(u, self.registration.scope);
+    const busted = new URL(clean);
+    busted.searchParams.set('v', VERSION);
+    const res = await fetch(busted, { cache: 'reload' });
+    if (!res.ok) throw new Error(`precache ${u}: ${res.status}`);
+    await cache.put(clean, res);
+  }));
+}
 
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
