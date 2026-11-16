@@ -1,5 +1,5 @@
 // Bump VERSION whenever shell files or rules change.
-const VERSION = 'v6';
+const VERSION = 'v7';
 const SHELL = `shell-${VERSION}`;
 const GAMES = `games-${VERSION}`;
 const FONTS = 'fonts-v1';

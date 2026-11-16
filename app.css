@@ -469,3 +469,8 @@ body.presenting .more-hint.on { opacity: .92; transform: translate(-50%, 0); poi
   body.presenting .more-hint { left: auto; right: max(12px, env(safe-area-inset-right)); transform: translateY(8px); bottom: calc(60px + var(--safe-b)); }
   body.presenting .more-hint.on { transform: none; animation: none; }
 }
+
+/* phones: no demo button — reading view only */
+@media (max-width: 700px), (max-height: 520px) and (pointer: coarse) {
+  #presentBtn { display: none !important; }
+}
