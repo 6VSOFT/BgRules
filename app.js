@@ -68,7 +68,7 @@
       }
       const pos = store.get('pos:' + g.id);
       return `<a class="game rv" href="#/g/${g.id}">
-        <img class="cover" src="${g.cover}" alt="${esc(g.title)} 封面" loading="lazy">
+        <img class="cover" src="${g.cover}" alt="${esc(g.title)} 封面" loading="lazy"${g.coverPos ? ` style="object-position:${esc(g.coverPos)}"` : ''}>
         <div class="body">
           <h3>${esc(g.title)}<small>${esc(g.en || '')}</small></h3>
           <p>${esc(g.tagline || '')}</p>

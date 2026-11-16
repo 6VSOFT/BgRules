@@ -1,5 +1,5 @@
 // Bump VERSION whenever shell files or rules change; it also busts the CDN cache on install.
-const VERSION = 'v9';
+const VERSION = 'v10';
 const SHELL = `shell-${VERSION}`;
 const GAMES = `games-${VERSION}`;
 const FONTS = 'fonts-v1';
