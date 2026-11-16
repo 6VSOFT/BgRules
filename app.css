@@ -509,3 +509,15 @@ body.presenting .tbl th, body.presenting .tbl td { padding: 8px 12px; }
   .tbl .die { margin-right: 6px; }
 }
 @media (max-width: 560px) { .tbl th { white-space: nowrap; } }
+
+/* GSAP drives the scroll reveal when fx.js is active; the CSS transition version steps aside */
+.fx-gsap .rv { opacity: 1; transform: none; transition: none; }
+.library h1 .split-parent { vertical-align: top; }
+.split-char { will-change: auto; }
+
+/* wide covers (e.g. ~2:1 box art): image full width at its natural ratio, nothing cropped; text below */
+section.cover.wide { grid-template-columns: 1fr !important; min-height: 0 !important; }
+section.cover.wide .art { height: auto !important; min-height: 0 !important; max-height: none !important; object-fit: contain; }
+section.cover.wide .txt { padding-top: clamp(24px, 4vw, 56px); }
+body.presenting .rules-doc > section.cover.wide { align-content: center; }
+body.presenting .rules-doc > section.cover.wide .art { max-height: 58vh !important; background: #0B1A21; }

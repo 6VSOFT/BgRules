@@ -55,10 +55,28 @@
     document.title = inGame ? `${game.title} · 规则书` : '桌游规则书';
   }
 
+  /* ---------------- fx helpers (GSAP / Lenis / React Bits via fx.js; plain fallbacks) ---------------- */
+  const FX = window.FX || null;
+  function jump(target, opts = {}) {
+    if (FX) return FX.scrollTo(target, opts);
+    if (typeof target === 'number') window.scrollTo({ top: target, behavior: opts.immediate ? 'auto' : 'smooth' });
+    else target.scrollIntoView({ behavior: opts.immediate ? 'auto' : 'smooth' });
+  }
+  // lazy images change the page height; let ScrollTrigger/Lenis re-measure once they settle
+  let refreshTimer;
+  function refreshOnImages(root) {
+    if (!FX) return;
+    $$('img', root).forEach(img => {
+      if (img.complete) return;
+      img.addEventListener('load', () => { clearTimeout(refreshTimer); refreshTimer = setTimeout(FX.refresh, 150); }, { once: true });
+    });
+  }
+
   /* ---------------- library ---------------- */
   function renderLibrary() {
     current = null;
     teardownObservers();
+    FX?.reset();
     setChrome(null);
     const last = store.get('lastGame');
     const cards = games.map(g => {
@@ -85,8 +103,10 @@
       <div class="shelf">${cards}</div>
       <p class="foot-note">规则图片来自各游戏官方规则书，仅用于学习交流。</p>
     </div>`;
-    window.scrollTo(0, 0);
+    jump(0, { immediate: true });
+    FX?.splitTitle($('.library h1 span'), '桌游规则书');
     setupReveal();
+    refreshOnImages(view);
   }
 
   /* ---------------- game ---------------- */
@@ -123,24 +143,26 @@
         }
         $$('.card, .rule, .pic, .swatch, h3, .lead, .callout', s).forEach(el => el.classList.add('rv'));
       });
+      FX?.reset();
       view.replaceChildren(doc);
       const pager = document.createElement('div');
       pager.className = 'pager';
       pager.innerHTML = '<button class="back-top" type="button">↑ 回到顶部</button>';
-      pager.firstChild.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+      pager.firstChild.onclick = () => jump(0);
       view.appendChild(pager);
       current = { game, sections };
       buildNav(sections);
       setupReveal();
       setupSpy();
+      refreshOnImages(doc);
       store.set('lastGame', game.id);
       const pos = store.get('pos:' + game.id);
       const target = pos != null && sections[pos];
       if (target && pos > 0 && !present) {
-        requestAnimationFrame(() => target.scrollIntoView());
+        requestAnimationFrame(() => jump(target, { immediate: true }));
         toast(`已回到上次的位置：${title(target)}`);
       } else {
-        window.scrollTo(0, 0);
+        jump(0, { immediate: true });
       }
     }
     if (present) enterPresent(store.get('pos:' + game.id) || 0);
@@ -163,7 +185,8 @@
   function goTo(i) {
     if (!current) return;
     if (document.body.classList.contains('presenting')) return showSlide(i);
-    current.sections[i]?.scrollIntoView({ behavior: 'smooth' });
+    const s = current.sections[i];
+    if (s) jump(s);
   }
 
   chips.addEventListener('click', e => {
@@ -203,6 +226,7 @@
 
   function setupReveal() {
     if (revealer) revealer.disconnect();
+    if (FX && FX.reveal($$('.rv', view))) return; // GSAP ScrollTrigger handles it
     revealer = new IntersectionObserver(entries => {
       entries.forEach(en => {
         if (!en.isIntersecting) return;
@@ -257,6 +281,8 @@
   function enterPresent(i) {
     if (!current) return;
     $('#pSegs').innerHTML = current.sections.map(() => '<i></i>').join('');
+    // slides must be fully visible even if their scroll reveal hasn't run yet
+    if (FX?.gsap) gsap.set($$('.rules-doc .rv'), { opacity: 1, y: 0, clearProps: 'transform' });
     document.body.classList.add('presenting');
     showSlide(i || 0, 0);
     // Fullscreen only on large screens; on phones it fights the browser's own UI.
@@ -273,7 +299,8 @@
     if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
     keepAwake(false);
     if (current) {
-      current.sections[presentIdx]?.scrollIntoView();
+      const s = current.sections[presentIdx];
+      if (s) jump(s, { immediate: true });
       if (updateHash) history.replaceState(null, '', `#/g/${current.game.id}`);
     }
   }

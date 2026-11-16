@@ -1,5 +1,5 @@
 // Bump VERSION whenever shell files or rules change; it also busts the CDN cache on install.
-const VERSION = 'v10';
+const VERSION = 'v11';
 const SHELL = `shell-${VERSION}`;
 const GAMES = `games-${VERSION}`;
 const FONTS = 'fonts-v1';
@@ -9,6 +9,15 @@ const SHELL_FILES = [
   'index.html',
   'app.css',
   'app.js',
+  'fx.js',
+  'vendor/gsap/gsap.min.js',
+  'vendor/gsap/ScrollTrigger.min.js',
+  'vendor/gsap/SplitText.min.js',
+  'vendor/lenis/lenis.min.js',
+  'vendor/lenis/lenis.css',
+  'vendor/react/react.production.min.js',
+  'vendor/react/react-dom.production.min.js',
+  'vendor/reactbits/SplitText.js',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',

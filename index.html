@@ -18,7 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&family=Noto+Sans+SC:wght@400;700&display=swap">
-<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="vendor/lenis/lenis.css">
+<link rel="stylesheet" href="app.css?v=11">
 </head>
 <body>
 <header class="topbar">
@@ -69,6 +70,15 @@
 <div class="lightbox" id="lightbox"><img alt=""><p></p></div>
 <div class="toast" id="toast"></div>
 
-<script src="app.js"></script>
+<!-- GSAP 3.15.1 (+ScrollTrigger, SplitText), Lenis 1.3.27, React 18.3.1, React Bits SplitText -->
+<script src="vendor/gsap/gsap.min.js"></script>
+<script src="vendor/gsap/ScrollTrigger.min.js"></script>
+<script src="vendor/gsap/SplitText.min.js"></script>
+<script src="vendor/lenis/lenis.min.js"></script>
+<script src="vendor/react/react.production.min.js"></script>
+<script src="vendor/react/react-dom.production.min.js"></script>
+<script src="vendor/reactbits/SplitText.js?v=11"></script>
+<script src="fx.js?v=11"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>
