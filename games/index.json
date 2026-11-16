@@ -19,6 +19,15 @@
       "rules": "games/kraken/rules.html"
     },
     {
+      "id": "minodice",
+      "title": "MINO DICE",
+      "en": "牛头怪骰子",
+      "tagline": "牛头怪的吃墩骰子游戏：先预测，再赢墩——赢得刚刚好才得高分。",
+      "meta": ["3–6 人", "30 分钟", "8 岁+", "13 章"],
+      "cover": "games/minodice/img/cover.jpg",
+      "rules": "games/minodice/rules.html"
+    },
+    {
       "id": "next",
       "title": "下一款",
       "rules": null

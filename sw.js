@@ -1,5 +1,5 @@
 // Bump VERSION whenever shell files or rules change; it also busts the CDN cache on install.
-const VERSION = 'v8';
+const VERSION = 'v9';
 const SHELL = `shell-${VERSION}`;
 const GAMES = `games-${VERSION}`;
 const FONTS = 'fonts-v1';
@@ -33,6 +33,12 @@ const GAME_FILES = {
   kraken: [
     'rules.html',
     ...['captain', 'contents', 'cover', 'crew', 'execute_steps', 'ic_armed', 'ic_cabin', 'ic_cult', 'ic_disarmed', 'ic_drunk', 'ic_feed', 'ic_flog', 'ic_mermaid', 'ic_telescope', 'ic_tongue', 'kraken_statue', 'map', 'monkey', 'mutiny_table', 'offduty_table', 'parrot', 'pirate_drink', 'pirate_woman', 'rit_convert', 'rit_guns', 'rit_search', 'strategy_captain', 'teams_table'].map(n => `img/${n}.jpg`),
+  ],
+  minodice: [
+    'rules.html',
+    'img/cover.jpg',
+    ...['dice_overview', 'ic_minotaur', 'ic_griffin', 'ic_mermaid', 'ranking',
+      'example_round', 'example_bonus'].map(n => `img/${n}.png`),
   ],
 };
 
