@@ -10,6 +10,15 @@
       "rules": "games/harmonies/rules.html"
     },
     {
+      "id": "kraken",
+      "title": "喂饱克拉肯",
+      "en": "Feed the Kraken",
+      "tagline": "秘密身份、轮流掌舵、互相猜疑——把船开往你的阵营的港口。",
+      "meta": ["5–11 人", "社交推理", "18 章"],
+      "cover": "games/kraken/img/cover.jpg",
+      "rules": "games/kraken/rules.html"
+    },
+    {
       "id": "next",
       "title": "下一款",
       "rules": null

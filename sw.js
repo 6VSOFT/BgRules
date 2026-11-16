@@ -1,5 +1,5 @@
 // Bump VERSION whenever shell files or rules change.
-const VERSION = 'v5';
+const VERSION = 'v6';
 const SHELL = `shell-${VERSION}`;
 const GAMES = `games-${VERSION}`;
 const FONTS = 'fonts-v1';
@@ -29,6 +29,10 @@ const GAME_FILES = {
       'personal_boards', 'aid_stacking', 'setup_full', 'stacking', 'animal_card', 'endgame_art',
       'score_trees', 'score_mountains', 'score_fields', 'score_buildings', 'score_river',
       'score_islands', 'score_animals', 'nature_spirit', 'solo'].map(n => `img/${n}.jpg`),
+  ],
+  kraken: [
+    'rules.html',
+    ...['captain', 'contents', 'cover', 'crew', 'execute_steps', 'ic_armed', 'ic_cabin', 'ic_cult', 'ic_disarmed', 'ic_drunk', 'ic_feed', 'ic_flog', 'ic_mermaid', 'ic_telescope', 'ic_tongue', 'kraken_statue', 'map', 'monkey', 'mutiny_table', 'offduty_table', 'parrot', 'pirate_drink', 'pirate_woman', 'rit_convert', 'rit_guns', 'rit_search', 'strategy_captain', 'teams_table'].map(n => `img/${n}.jpg`),
   ],
 };
 
