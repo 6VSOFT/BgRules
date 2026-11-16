@@ -1,0 +1,18 @@
+{
+  "games": [
+    {
+      "id": "harmonies",
+      "title": "和谐",
+      "en": "Harmonies",
+      "tagline": "用彩色板块搭出美丽地形，为动物们打造家园。",
+      "meta": ["2–4 人 · 可单人", "30 分钟", "10 岁+", "14 章"],
+      "cover": "games/harmonies/img/cover_art.jpg",
+      "rules": "games/harmonies/rules.html"
+    },
+    {
+      "id": "next",
+      "title": "下一款",
+      "rules": null
+    }
+  ]
+}
