@@ -20,6 +20,7 @@
   let observer = null;
   let revealer = null;
   let presentIdx = 0;
+  let menuBook = null;     // flip-through menu book on the home page (menu.js)
 
   /* ---------------- data ---------------- */
   async function loadGames() {
@@ -53,6 +54,7 @@
     $('#brandText').textContent = inGame ? game.title : '桌游规则书';
     $('#brand img').hidden = inGame;
     document.title = inGame ? `${game.title} · 规则书` : '桌游规则书';
+    if (inGame && menuBook) { menuBook.destroy(); menuBook = null; }
   }
 
   /* ---------------- fx helpers (GSAP / Lenis / React Bits via fx.js; plain fallbacks) ---------------- */
@@ -100,11 +102,15 @@
       <p class="eyebrow">GET! BOARDGAME · 规则书</p>
       <h1><span>桌游规则书</span></h1>
       <p class="lead">翻开一本，几分钟上手。装到主屏幕后可离线使用，桌边随时查。</p>
+      <section class="mb-stage" id="menuBook" aria-label="菜单本：左右翻页挑选游戏"></section>
       <div class="shelf">${cards}</div>
       <p class="foot-note">规则图片来自各游戏官方规则书，仅用于学习交流。</p>
     </div>`;
     jump(0, { immediate: true });
     FX?.splitTitle($('.library h1 span'), '桌游规则书');
+    if (menuBook) menuBook.destroy();
+    menuBook = window.MenuBook ? window.MenuBook.mount($('#menuBook'), games, { startId: last }) : null;
+    if (!menuBook) $('#menuBook')?.remove();
     setupReveal();
     refreshOnImages(view);
   }
