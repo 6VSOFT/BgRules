@@ -1,5 +1,5 @@
 // Bump VERSION whenever shell files or rules change; it also busts the CDN cache on install.
-const VERSION = 'v13';
+const VERSION = 'v14';
 const SHELL = `shell-${VERSION}`;
 const GAMES = `games-${VERSION}`;
 const FONTS = 'fonts-v1';
@@ -49,6 +49,11 @@ const GAME_FILES = {
     'img/cover.jpg',
     ...['dice_overview', 'ic_minotaur', 'ic_griffin', 'ic_mermaid', 'ranking',
       'example_round', 'example_bonus'].map(n => `img/${n}.png`),
+  ],
+  modernart: [
+    'rules.html',
+    ...['cover', 'auction_scene', 'components', 'painting_cards', 'screen', 'ic_open', 'ic_once',
+      'ic_sealed', 'ic_fixed', 'ic_double', 'fifth_card', 'value_board', 'sealed_reveal', 'winner'].map(n => `img/${n}.jpg`),
   ],
 };
 

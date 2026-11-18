@@ -29,6 +29,16 @@
       "rules": "games/minodice/rules.html"
     },
     {
+      "id": "modernart",
+      "title": "现代艺术",
+      "en": "Modern Art",
+      "tagline": "经营画廊，拍卖画作，赚最多的钱——五种拍卖方式，人人都能参与。",
+      "meta": ["3–5 人", "4 轮", "拍卖", "13 章"],
+      "cover": "games/modernart/img/cover.jpg",
+      "coverPos": "50% 0%",
+      "rules": "games/modernart/rules.html"
+    },
+    {
       "id": "next",
       "title": "下一款",
       "rules": null
